@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Email signature · Ryan Rosenthal</title>
+<link rel="icon" href="/rr.svg" type="image/svg+xml" />
+<style>
+  @font-face { font-family: "Overused Grotesk"; src: url("/fonts/OverusedGrotesk-Medium.woff2") format("woff2"); font-weight: 500; }
+  @font-face { font-family: "Overused Grotesk"; src: url("/fonts/OverusedGrotesk-SemiBold.woff2") format("woff2"); font-weight: 600; }
+  @font-face { font-family: "Overused Grotesk"; src: url("/fonts/OverusedGrotesk-Bold.woff2") format("woff2"); font-weight: 700; }
+  :root { --paper: #d4d4d4; --ink: #2f2f2f; --ink-2: #555; --rule: rgba(0,0,0,.265); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: "Overused Grotesk", "Helvetica Neue", Arial, sans-serif; padding: 32px 16px 64px; -webkit-font-smoothing: antialiased; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-weight: 700; font-size: clamp(34px, 7vw, 52px); letter-spacing: -.06em; line-height: .95; }
+  .lede { margin-top: 12px; font-weight: 500; font-size: 16px; color: var(--ink-2); max-width: 56ch; line-height: 1.4; }
+  .card { margin-top: 28px; padding-top: 18px; border-top: 2px solid var(--rule); }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h2 { font-weight: 600; font-size: 24px; letter-spacing: -.045em; }
+  .note { font-weight: 500; font-size: 14px; color: var(--ink-2); margin-top: 4px; }
+  .rec { display: inline-block; font-weight: 600; font-size: 12px; background: var(--ink); color: #e9e9e7; border-radius: 999px; padding: 3px 10px; margin-left: 8px; vertical-align: middle; letter-spacing: 0; }
+  .previews { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 14px; }
+  @media (min-width: 720px) { .previews { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .pv { border-radius: 12px; padding: 16px; }
+  .pv.light { background: #ffffff; }
+  .pv.dark { background: #1c1c1e; }
+  .pv small { display: block; font-size: 11px; font-weight: 600; margin-bottom: 8px; color: #8a8a8a; }
+  .pv .sig img { display: block; width: 100%; max-width: 600px; height: auto; }
+  .pv .sig p { margin-top: 6px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; }
+  .pv.light .sig p, .pv.light .sig a { color: #555555; }
+  .pv.dark .sig p, .pv.dark .sig a { color: #b5b5b5; }
+  .pv .sig a { text-decoration: none; }
+  button { margin-top: 12px; font: 600 16px/1 "Overused Grotesk", sans-serif; letter-spacing: -.02em; background: var(--ink); color: #e9e9e7; border: 0; border-radius: 999px; padding: 13px 20px; cursor: pointer; }
+  button:active { transform: translateY(1px); }
+  .done { margin-left: 10px; font-weight: 600; font-size: 14px; color: var(--ink-2); }
+  ol { margin-top: 12px; padding-left: 20px; font-weight: 500; font-size: 15px; line-height: 1.55; color: var(--ink); }
+  code { font-size: 13px; background: rgba(255,255,255,.45); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Email signature</h1>
+  <p class="lede">Pick a version, press Copy, then paste into Gmail: Settings, See all settings, General, Signature. The image stays sharp on retina and links to your link page. The text line under it is tappable and still shows when an email app blocks images.</p>
+
+  <section class="card">
+    <h2>How to install in Gmail</h2>
+    <ol>
+      <li>Press <b>Copy signature</b> on the version you want.</li>
+      <li>Open <a href="https://mail.google.com/mail/u/0/#settings/general" target="_blank" rel="noreferrer">Gmail settings, General</a>, scroll to <b>Signature</b>, create one called <code>Ryan</code>.</li>
+      <li>Click in the box and paste (Cmd+V). Don't resize the image.</li>
+      <li>Under <b>Signature defaults</b>, set it for new emails and replies (for ryan@ryanrosenthal.com). Save at the bottom.</li>
+    </ol>
+  </section>
+
+  <div id="variants"></div>
+</main>
+
+<script>
+  const BASE = "https://links.ryanrosenthal.com/signature/";
+  const LINE_LIGHT = "#555555";
+  const VARIANTS = [
+    { id: "black", name: "Black", rec: true, note: "Strongest on white emails. Disappears in dark mode, so the text line carries it there." },
+    { id: "grey", name: "Grey", note: "Readable on light and dark. Quieter on white." },
+    { id: "auto", name: "Auto (Apple Mail)", note: "Black in light mode, white in dark mode. Apple Mail and iOS Mail swap it; Gmail shows black." },
+    { id: "white", name: "White", note: "Dark mode only. Invisible on white, so only use it inside the Auto version." },
+  ];
+
+  const img = (c, extra = "") =>
+    `<img src="${BASE}footer-${c}@2x.png" width="600" height="150" alt="Ryan Rosenthal · Creative Systems + AI Strategy for Brands" style="display:block;width:600px;max-width:100%;height:auto;border:0;"${extra}>`;
+
+  // Email-safe markup: tables, inline styles, absolute URLs, Arial for the text line.
+  function signature(id) {
+    const picture =
+      id === "auto"
+        ? `<picture><source srcset="${BASE}footer-white@2x.png" media="(prefers-color-scheme: dark)">${img("black")}</picture>`
+        : img(id);
+    return `<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;">
+<tr><td style="padding:0;"><a href="https://links.ryanrosenthal.com" target="_blank" style="text-decoration:none;">${picture}</a></td></tr>
+<tr><td style="padding:6px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:${LINE_LIGHT};">
+<a href="mailto:ryan@ryanrosenthal.com" style="color:${LINE_LIGHT};text-decoration:none;">ryan@ryanrosenthal.com</a> &nbsp;·&nbsp;
+<a href="tel:+18182922622" style="color:${LINE_LIGHT};text-decoration:none;">818.292.2622</a> &nbsp;·&nbsp;
+<a href="https://links.ryanrosenthal.com" target="_blank" style="color:${LINE_LIGHT};text-decoration:none;">links.ryanrosenthal.com</a>
+</td></tr></table>`;
+  }
+
+  const plain = "Ryan Rosenthal\nCreative Systems + AI Strategy for Brands\nryan@ryanrosenthal.com · 818.292.2622 · links.ryanrosenthal.com";
+
+  async function copy(id, btn) {
+    const html = signature(id);
+    const status = btn.nextElementSibling;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([plain], { type: "text/plain" }) })]);
+    } catch {
+      // Fallback: select the rendered signature and copy it.
+      const holder = document.createElement("div");
+      holder.innerHTML = html;
+      holder.style.position = "fixed"; holder.style.left = "-9999px";
+      document.body.appendChild(holder);
+      const r = document.createRange(); r.selectNodeContents(holder);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      document.execCommand("copy"); s.removeAllRanges(); holder.remove();
+    }
+    status.textContent = "Copied. Paste it into Gmail's signature box.";
+  }
+
+  const preview = (id, mode) => {
+    const c = id === "auto" ? (mode === "dark" ? "white" : "black") : id;
+    return `<div class="pv ${mode}"><small>${mode === "dark" ? "Dark mode" : "White email"}</small><div class="sig">
+      <a href="https://links.ryanrosenthal.com"><img src="./footer-${c}@2x.png" width="600" height="150" alt="Ryan Rosenthal · Creative Systems + AI Strategy for Brands"></a>
+      <p><a href="mailto:ryan@ryanrosenthal.com">ryan@ryanrosenthal.com</a> · <a href="tel:+18182922622">818.292.2622</a> · <a href="https://links.ryanrosenthal.com">links.ryanrosenthal.com</a></p></div></div>`;
+  };
+
+  document.getElementById("variants").innerHTML = VARIANTS.map((v) => `
+    <section class="card">
+      <div class="head"><h2>${v.name}${v.rec ? '<span class="rec">Recommended</span>' : ""}</h2></div>
+      <p class="note">${v.note}</p>
+      <div class="previews">${preview(v.id, "light")}${preview(v.id, "dark")}</div>
+      ${v.id === "white" ? "" : `<button type="button" data-id="${v.id}">Copy signature</button><span class="done" role="status"></span>`}
+    </section>`).join("");
+  document.querySelectorAll("button[data-id]").forEach((b) => b.addEventListener("click", () => copy(b.dataset.id, b)));
+</script>
+</body>
+</html>
